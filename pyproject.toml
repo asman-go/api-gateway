@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt", "hatch-build-scripts"]
+build-backend = "hatchling.build"
+
+[project]
+name = "asman-api-gateway"
+version = "0.0.1"
+authors = [
+    { name="Petrakov Oleg", email="murami.ike@gmail.com" },
+]
+description = "API Gateway app"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# use plugin: https://github.com/repo-helper/hatch-requirements-txt
+dynamic = ["dependencies"]
+
+[project.urls]
+"Source code" = "https://github.com/asman-go/api-gateway"
+Issues = "https://github.com/asman-go/api-gateway/issues"
+
+# dependencies
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.build.targets.wheel]
+only-include = [
+    "src/gateway",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/gateway" = "asman/gateway"
