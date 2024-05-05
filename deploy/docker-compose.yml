@@ -1,11 +1,34 @@
 version: '3'
 
 services:
+  asman-postgres:
+    image: postgres:alpine
+    restart: always
+    environment:
+      POSTGRES_DB: my_db
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
+    volumes:
+      - ./postgres_init:/docker-entrypoint-initdb.d
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - asman-network
+
   asman-gateway:
     build:
       context: ..
       dockerfile: ./deploy/Dockerfile
     container_name: asman-gateway
     restart: always
+    environment:
+      POSTGRES_HOST: asman-postgres
+      POSTGRES_DB: my_db
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_password
     ports:
       - 8080:3000
+    networks:
+      - asman-network
+
+networks:
+  asman-network:
