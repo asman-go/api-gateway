@@ -10,6 +10,7 @@ from asman.gateway.middlewares import (
     LoggerMiddleware,
 )
 from asman.gateway.routers import (
+    ProgramRouter,
     DevChecksRouter,
     ExampleRouter,
 )
@@ -35,6 +36,7 @@ class GatewayAPI(object):
         app.add_middleware(ExceptionMiddleware, app_name=self.logger_name)
 
         app.include_router(DevChecksRouter)
+        app.include_router(ProgramRouter, prefix='/program')
         app.include_router(ExampleRouter, prefix='/example')
 
         return app
