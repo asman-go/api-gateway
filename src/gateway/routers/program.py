@@ -19,6 +19,14 @@ from asman.core.adapters.db import PostgresConfig
 
 router = APIRouter()
 
+"""
+Задачи:
+
+1. Работа с информацией о бб программе
+2. 
+
+"""
+
 @router.get('/')
 async def read_all():
     config = PostgresConfig()

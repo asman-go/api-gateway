@@ -1,3 +1,5 @@
+celery[sqs,sqlalchemy,dynamodb,redis]
+cryptography
 fastapi
 pydantic
 pydantic_settings

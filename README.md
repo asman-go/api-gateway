@@ -1,5 +1,5 @@
 # api-gateway
-Asman API Gateway
+Asman Compute Engine API Gateway
 
 # Project: build
 
@@ -28,8 +28,8 @@ Python >= 3.10
 
 Go to:
 
-- http://localhost:8080/healthcheck
-- http://localhost:8080/example
+- http://localhost:7860/healthcheck
+- http://localhost:7860/example
 
 # TODO
 

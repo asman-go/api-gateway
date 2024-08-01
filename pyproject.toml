@@ -35,7 +35,9 @@ files = ["requirements.txt"]
 [tool.hatch.build.targets.wheel]
 only-include = [
     "src/gateway",
+    "src/queue",
 ]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/gateway" = "asman/gateway"
+"src/queue" = "asman/queue"
