@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Header, Request
+from fastapi import APIRouter, Query, Header, Request, Response
 from typing import Annotated
 
 from asman.gateway.core.configs import FacebookConfig
@@ -23,7 +23,7 @@ async def webhook(
             verify_token: Annotated[str, Query(alias='hub.verify_token')]
         ):
     config = FacebookConfig()
-    print('Receive Webhook Verification Request. hub.mode is', mode)
+    print('Receive Webhook Verification Request. hub.mode is', mode, config.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN)
 
     if verify_token == config.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN:
         return {
@@ -31,10 +31,7 @@ async def webhook(
             'body': challenge
         }
 
-    return {
-        'statusCode': 200,
-        'body': ''
-    }
+    return Response(status_code=401)
 
 
 @router.post('/webhook')
@@ -45,4 +42,8 @@ async def new_ct_event(
     config = FacebookConfig()
     body = await request.body()
     if signature == hmac_digest(config.FACEBOOK_CLIENT_SECRET, body):
-        ...
+        print('FB WebHook event (TODO):', body)
+
+        return Response(status_code=200)
+
+    return Response(status_code=401)
