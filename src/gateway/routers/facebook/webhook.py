@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Query, Header, Request, Response
 from typing import Annotated
+import json
 
 from asman.gateway.core.configs import FacebookConfig
 from asman.gateway.core.utils import hmac_digest
+from asman.domains.facebook_api.use_cases import NewCtEventUseCase
+from asman.domains.facebook_api.api import FacebookCtEvent
+from asman.core.adapters.db import PostgresConfig
 
 
 router = APIRouter()
@@ -39,12 +43,20 @@ async def new_ct_event(
             signature: Annotated[str, Header(alias='X-Hub-Signature-256')],
             request: Request,
         ):
-    config = FacebookConfig()
-    body = await request.body()
-    body = body.decode()
-    if signature == hmac_digest(config.FACEBOOK_CLIENT_SECRET, body):
-        print('FB WebHook event (TODO):', body)
+    facebook_config = FacebookConfig()
+    postgres_config = PostgresConfig()
 
-        return Response(status_code=200)
+    body = (await request.body()).decode()
+
+    if signature == hmac_digest(facebook_config.FACEBOOK_CLIENT_SECRET, body):
+        print('FB WebHook body event (TODO):', body)
+        ct_event = FacebookCtEvent(
+            **json.loads(body)
+        )
+        print('FB WebHook parsed event (TODO):', ct_event)
+        use_case = NewCtEventUseCase(None, postgres_config)
+        status = use_case.execute(ct_event)
+
+        return Response(status_code=200) if status else Response(status_code=502)
 
     return Response(status_code=401)

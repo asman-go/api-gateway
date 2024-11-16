@@ -1,5 +1,26 @@
+import pytest
+
 import json
 from asman.gateway.core.utils import hmac_digest
+from asman.domains.facebook_api.api import FacebookCtEvent, NewCertificateEvent
+
+
+@pytest.fixture
+def fb_ct_event():
+    return FacebookCtEvent(
+        object='certificate_transparency',
+        entry=[
+            NewCertificateEvent(
+                id='123',
+                time=123,
+                changes={
+                    'value': {
+                        'certificate_pem': 'TODO'  # TODO: пример серта создать
+                    }
+                }
+            )
+        ],
+    )
 
 
 def test_check_facebook_webhook(public_client, facebook_webhook_config):
