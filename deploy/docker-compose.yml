@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   asman-postgres:
     image: postgres:alpine

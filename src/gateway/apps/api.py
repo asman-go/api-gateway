@@ -30,10 +30,13 @@ class GatewayAPI(object):
     def start(self) -> FastAPI:
 
         app = self._base_fast_api_app(self.config.logger_name)
+        app.root_path = '/api'
 
         app.mount('/app', self._user_api(self.config.logger_name))
         app.mount('/admin', self._admin_api(self.config.logger_name))
         app.mount('/integrations', self._integrations_api(self.config.logger_name))
+
+        app.include_router(DevChecksRouter)
 
         return app
 
@@ -71,7 +74,5 @@ class GatewayAPI(object):
         # app.add_middleware(HTTPSRedirectMiddleware)
         app.add_middleware(LoggerMiddleware, app_name=app_name)
         app.add_middleware(ExceptionMiddleware, app_name=app_name)
-
-        app.include_router(DevChecksRouter)
 
         return app

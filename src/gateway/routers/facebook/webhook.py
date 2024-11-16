@@ -41,6 +41,7 @@ async def new_ct_event(
         ):
     config = FacebookConfig()
     body = await request.body()
+    body = body.decode()
     if signature == hmac_digest(config.FACEBOOK_CLIENT_SECRET, body):
         print('FB WebHook event (TODO):', body)
 

@@ -21,7 +21,7 @@ def program_data():
 @pytest.fixture
 def program_id(user_client, program_data):
     response = user_client.post(
-        '/app/program',
+        '/program',
         json={
             'program': program_data.model_dump(),
         },

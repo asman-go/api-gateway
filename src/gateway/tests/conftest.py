@@ -7,6 +7,15 @@ from asman.gateway.core.configs import ApiGatewayConfig, ApiKeyConfig, FacebookC
 
 
 @pytest.fixture
+def postgres_config(monkeypatch):
+    monkeypatch.setenv('POSTGRES_DB', 'my_db')
+    monkeypatch.setenv('POSTGRES_USER', 'my_user')
+    monkeypatch.setenv('POSTGRES_PASSWORD', 'my_password')
+    monkeypatch.setenv('POSTGRES_HOST', 'localhost')
+    monkeypatch.setenv('POSTGRES_PORT', '6432')
+
+
+@pytest.fixture
 def api_config(monkeypatch):
     monkeypatch.setenv('HTTP_HOST', 'localhost')
     monkeypatch.setenv('API_GATEWAY_HTTP_PORT', '8080')
@@ -41,34 +50,41 @@ def app_config(api_config, api_key_config, facebook_webhook_config):
 
 
 @pytest.fixture
-def gateway_app(app_config):
+def gateway_app(app_config, postgres_config):
     return GatewayAPI(app_config).start()
 
 
 @pytest.fixture
 def user_client(gateway_app, app_config):
-    return TestClient(
+    client = TestClient(
         gateway_app,
-        root_path='/app',
         headers={
             'Authorization': app_config.api_secrets.USER_API_KEY,
         },
     )
+    client.base_url = client.base_url.join('/api/app')
+
+    return client
 
 
 @pytest.fixture
 def admin_client(gateway_app, app_config):
-    return TestClient(
+    client = TestClient(
         gateway_app,
-        root_path='/admin',
         headers={
             'Authorization': app_config.api_secrets.ADMIN_API_KEY,
         },
     )
+    client.base_url = client.base_url.join('/api/admin')
+
+    return client
 
 
 @pytest.fixture
 def public_client(gateway_app):
-    return TestClient(
+    client = TestClient(
         gateway_app,
     )
+    client.base_url = client.base_url.join('/api')
+
+    return client
