@@ -16,6 +16,7 @@ from asman.gateway.routers import (
     DevChecksRouter,
     ExampleRouter,
     FacebookWebhookRouter,
+    CertificateTransparencyRouter,
 )
 
 
@@ -32,11 +33,11 @@ class GatewayAPI(object):
         app = self._base_fast_api_app(self.config.logger_name)
         app.root_path = '/api'
 
-        app.mount('/app', self._user_api(self.config.logger_name))
-        app.mount('/admin', self._admin_api(self.config.logger_name))
+        app.mount('/public', self._public_api(self.config.logger_name))
         app.mount('/integrations', self._integrations_api(self.config.logger_name))
 
-        app.include_router(DevChecksRouter)
+        app.mount('/admin', self._admin_api(self.config.logger_name))
+        app.mount('/private', self._private_api(self.config.logger_name))
 
         return app
 
@@ -49,15 +50,23 @@ class GatewayAPI(object):
 
         return admin_app
 
-    def _user_api(self, app_name: str) -> FastAPI:
+    def _private_api(self, app_name: str) -> FastAPI:
 
         user_app = self._base_fast_api_app(app_name)
 
         user_app.add_middleware(AuthMiddleware, app_name=app_name, api_key=self.config.api_secrets.USER_API_KEY)
         user_app.include_router(ProgramRouter, prefix='/program')
         user_app.include_router(ExampleRouter, prefix='/example')
+        user_app.include_router(CertificateTransparencyRouter, prefix='/ctlog')
 
         return user_app
+
+    def _public_api(self, app_name: str) -> FastAPI:
+
+        public_api = self._base_fast_api_app(app_name)
+        public_api.include_router(DevChecksRouter)
+
+        return public_api
 
     def _integrations_api(self, app_name: str) -> FastAPI:
 

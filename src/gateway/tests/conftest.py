@@ -2,8 +2,9 @@ import pytest
 
 from fastapi.testclient import TestClient
 
+from asman.core.adapters.tests import facebook_config
 from asman.gateway.apps.api import GatewayAPI
-from asman.gateway.core.configs import ApiGatewayConfig, ApiKeyConfig, FacebookConfig, AppGatewayConfig
+from asman.gateway.core.configs import ApiGatewayConfig, ApiKeyConfig, AppGatewayConfig
 
 
 @pytest.fixture
@@ -32,20 +33,12 @@ def api_key_config(monkeypatch):
 
 
 @pytest.fixture
-def facebook_webhook_config(monkeypatch):
-    monkeypatch.setenv('FACEBOOK_CLIENT_SECRET', 'client-secret')
-    monkeypatch.setenv('FACEBOOK_WEBHOOK_VERIFICATION_TOKEN', 'verification-token')
-
-    return FacebookConfig()
-
-
-@pytest.fixture
-def app_config(api_config, api_key_config, facebook_webhook_config):
+def app_config(api_config, api_key_config, facebook_config):
     return AppGatewayConfig(
         environment=api_config.ENVIRONMENT,
         logger_name=api_config.API_GATEWAY_LOGGER_NAME,
         api_secrets=api_key_config,
-        fb_secrets=facebook_webhook_config,
+        fb_secrets=facebook_config,
     )
 
 
@@ -55,14 +48,14 @@ def gateway_app(app_config, postgres_config):
 
 
 @pytest.fixture
-def user_client(gateway_app, app_config):
+def private_client(gateway_app, app_config):
     client = TestClient(
         gateway_app,
         headers={
             'Authorization': app_config.api_secrets.USER_API_KEY,
         },
     )
-    client.base_url = client.base_url.join('/api/app')
+    client.base_url = client.base_url.join('/api/private')
 
     return client
 
@@ -85,6 +78,16 @@ def public_client(gateway_app):
     client = TestClient(
         gateway_app,
     )
-    client.base_url = client.base_url.join('/api')
+    client.base_url = client.base_url.join('/api/public')
+
+    return client
+
+
+@pytest.fixture
+def integrations_client(gateway_app):
+    client = TestClient(
+        gateway_app,
+    )
+    client.base_url = client.base_url.join('/api/integrations')
 
     return client

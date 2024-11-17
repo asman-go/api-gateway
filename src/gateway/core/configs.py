@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 import uuid
 
 from asman.gateway.core.types import Environment
+from asman.core.adapters.clients.facebook import FacebookConfig
 
 
 class ApiGatewayConfig(BaseSettings):
@@ -15,11 +16,6 @@ class ApiGatewayConfig(BaseSettings):
 class ApiKeyConfig(BaseSettings):
     USER_API_KEY: str = Field(default_factory=lambda: str(uuid.uuid4()))
     ADMIN_API_KEY: str = Field(default_factory=lambda: str(uuid.uuid4()))
-
-
-class FacebookConfig(BaseSettings):
-    FACEBOOK_WEBHOOK_VERIFICATION_TOKEN: str = Field(default='UNDEFINED')
-    FACEBOOK_CLIENT_SECRET: str = Field(default='UNDEFINED')
 
 
 class AppGatewayConfig(BaseModel):

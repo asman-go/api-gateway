@@ -19,8 +19,8 @@ def program_data():
 
 
 @pytest.fixture
-def program_id(user_client, program_data):
-    response = user_client.post(
+def program_id(private_client, program_data):
+    response = private_client.post(
         '/program',
         json={
             'program': program_data.model_dump(),
@@ -32,8 +32,8 @@ def program_id(user_client, program_data):
 
 
 @pytest.fixture
-def program_id_to_delete(user_client, program_data):
-    response = user_client.post(
+def program_id_to_delete(private_client, program_data):
+    response = private_client.post(
         '/program',
         json={
             'program': program_data.model_dump(),
@@ -44,8 +44,8 @@ def program_id_to_delete(user_client, program_data):
     return response['id']
 
 
-def test_program_create(user_client, program_data):
-    response = user_client.post(
+def test_program_create(private_client, program_data):
+    response = private_client.post(
         '/program',
         json={
             'program': program_data.model_dump(),
@@ -60,8 +60,8 @@ def test_program_create(user_client, program_data):
     assert isinstance(response['id'], int)
 
 
-def test_program_read(user_client, program_id):
-    response = user_client.get(f'/program/{program_id}')
+def test_program_read(private_client, program_id):
+    response = private_client.get(f'/program/{program_id}')
 
     assert response.status_code == 200
 
@@ -74,11 +74,11 @@ def test_program_read(user_client, program_id):
     assert Program(**program)
 
 
-def test_program_update(user_client, program_id, program_data):
+def test_program_update(private_client, program_id, program_data):
     new_program_data = deepcopy(program_data)
     new_program_data.program_name = 'NEW_VALUE'
 
-    response = user_client.put(f'/program/{program_id}', json={
+    response = private_client.put(f'/program/{program_id}', json={
         'program': new_program_data.model_dump(),
     })
 
@@ -98,8 +98,8 @@ def test_program_update(user_client, program_id, program_data):
     assert program.data.program_name == 'NEW_VALUE'
 
 
-def test_program_read_all(user_client):
-    response = user_client.get('/program')
+def test_program_read_all(private_client):
+    response = private_client.get('/program')
 
     assert response.status_code == 200
     response = response.json()
@@ -107,22 +107,22 @@ def test_program_read_all(user_client):
     assert isinstance(response['programs'], list)
 
 
-def test_program_delete(user_client, program_id_to_delete):
-    response = user_client.get(f'/program/{program_id_to_delete}')
+def test_program_delete(private_client, program_id_to_delete):
+    response = private_client.get(f'/program/{program_id_to_delete}')
 
     response = response.json()
     program = response['program']
 
     assert program
 
-    response = user_client.delete(f'/program/{program_id_to_delete}')
+    response = private_client.delete(f'/program/{program_id_to_delete}')
 
     assert response.status_code == 200
     assert response.json() == {
         'status': True
     }
 
-    response = user_client.get(f'/program/{program_id_to_delete}')
+    response = private_client.get(f'/program/{program_id_to_delete}')
 
     response = response.json()
     program = response['program']

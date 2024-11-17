@@ -1,8 +1,9 @@
 import uvicorn
+
+from asman.core.adapters.clients.facebook import FacebookConfig
 from asman.gateway.apps.api import GatewayAPI
 from asman.gateway.core.configs import (
     ApiGatewayConfig,
-    FacebookConfig,
     ApiKeyConfig,
     AppGatewayConfig,
 )

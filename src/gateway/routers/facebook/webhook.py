@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Query, Header, Request, Response
+import pydantic
 from typing import Annotated
 import json
 
-from asman.gateway.core.configs import FacebookConfig
 from asman.gateway.core.utils import hmac_digest
 from asman.domains.facebook_api.use_cases import NewCtEventUseCase
 from asman.domains.facebook_api.api import FacebookCtEvent
 from asman.core.adapters.db import PostgresConfig
+from asman.core.adapters.clients.facebook import FacebookConfig
 
 
 router = APIRouter()
@@ -50,9 +51,12 @@ async def new_ct_event(
 
     if signature == hmac_digest(facebook_config.FACEBOOK_CLIENT_SECRET, body):
         print('FB WebHook body event (TODO):', body)
-        ct_event = FacebookCtEvent(
-            **json.loads(body)
+        ct_event = pydantic.TypeAdapter(
+            FacebookCtEvent
+        ).validate_python(
+            json.loads(body)
         )
+
         print('FB WebHook parsed event (TODO):', ct_event)
         use_case = NewCtEventUseCase(None, postgres_config)
         status = use_case.execute(ct_event)
