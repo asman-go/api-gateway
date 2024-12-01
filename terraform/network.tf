@@ -44,12 +44,12 @@ resource "yandex_vpc_security_group" "instance-security-group" {
     port           = var.postgres-config.remote-port
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    description    = "Allow Fluentd"
-    protocol       = "ANY" # TCP | UDP
-    port           = 24224
-    v4_cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   description    = "Allow Fluentd"
+  #   protocol       = "ANY" # TCP | UDP
+  #   port           = 24224
+  #   v4_cidr_blocks = ["0.0.0.0/0"]
+  # }
 
   egress {
     description    = "Permit ANY"
