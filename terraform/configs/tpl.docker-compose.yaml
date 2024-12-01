@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: ${POSTGRES_LOCAL_HOST}
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGRES_REMOTE_PORT}:${POSTGRES_LOCAL_PORT}
+    volumes:
+      - /etc/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - /home/${DEFAULT_USER}/data-disk/${DEVICE_NAME}:/var/lib/postgresql/data
+
+  gateway:
+    image: ${ASMAN_API_GATEWAY_IMAGE}
+    container_name: ${GW_LOCAL_HOST}
+    restart: always
+    environment:
+      ENVIRONMENT: ${ASMAN_ENVIRONMENT}
+
+      POSTGRES_HOST: ${POSTGRES_LOCAL_HOST}
+      POSTGRES_PORT: ${POSTGRES_LOCAL_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      USER_API_KEY: ${USER_API_KEY}
+      ADMIN_API_KEY: ${ADMIN_API_KEY}
+
+      FACEBOOK_CLIENT_ID: ${FACEBOOK_CLIENT_ID}
+      FACEBOOK_CLIENT_SECRET: ${FACEBOOK_CLIENT_SECRET}
+      FACEBOOK_WEBHOOK_VERIFICATION_TOKEN: ${FACEBOOK_WEBHOOK_VERIFICATION_TOKEN}
+
+    expose:
+      # Для nginx, но наружу не будем открывать через security groups
+      - ${GW_LOCAL_PORT}
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/nginx.default.conf:/etc/nginx/conf.d/default.conf
+
+
+x-yc-disks:
+  - device_name: ${DEVICE_NAME}
+    fs_type: ext4
+    host_path: /home/${DEFAULT_USER}/data-disk

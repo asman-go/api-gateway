@@ -1,7 +1,16 @@
 # api-gateway
 Asman Compute Engine API Gateway
 
-# Project: build
+# Build docker image
+
+```
+$ make build
+$ make push
+```
+
+# Develope
+
+## Prepare python venv
 
 Python >= 3.10
 
@@ -19,7 +28,7 @@ Python >= 3.10
 ~ python -m pip uninstall asman
 ```
 
-# Deploy: build & run
+## Deploy local: build & run
 
 ```
 ~ docker compose -f deploy/docker-compose.yml build
@@ -31,7 +40,7 @@ Go to:
 - http://localhost:7860/healthcheck
 - http://localhost:7860/example
 
-# Run tests
+## Run tests
 
 Поднимаем тестовую базу (для use-case'ов нужна)
 
@@ -45,7 +54,7 @@ Go to:
 ~ python -m pytest .
 ```
 
-## Errors
+### Errors
 
 ```
 ERROR src/gateway/tests - ImportError: cannot import name 'runtime_version' from 'google.protobuf'
