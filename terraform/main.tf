@@ -1,7 +1,8 @@
 locals {
   default-user = "yc-user"
   # Нужно для правильного названия облачного диска postgres
-  device-name = "pgdata"
+  device-name        = "pgdata"
+  logging-group-name = "gateway-logs"
 }
 
 # IAM
@@ -21,6 +22,23 @@ resource "yandex_resourcemanager_folder_iam_binding" "image-puller" {
   provider = yandex.with-project-info
 }
 
+resource "yandex_resourcemanager_folder_iam_binding" "logging-writer" {
+  folder_id = data.yandex_resourcemanager_folder.folder.id
+  role      = "logging.writer"
+  members   = ["serviceAccount:${yandex_iam_service_account.sa-image-puller.id}"]
+
+  provider = yandex.with-project-info
+}
+
+# Logging
+
+resource "yandex_logging_group" "group" {
+  name             = local.logging-group-name
+  retention_period = "168h" # 7d
+
+  provider = yandex.with-project-info
+}
+
 # VM with docker compose
 
 module "vm-instance" {
@@ -35,11 +53,17 @@ module "vm-instance" {
 
     GW_LOCAL_HOST = var.gateway-config.local-host
     GW_LOCAL_PORT = var.gateway-config.local-port
+
+    YC_GROUP_ID = yandex_logging_group.group.id
+
+    FLUENT_BIT_HOST = "fluentbit"
+    FLUENT_BIT_PORT = 24224
   })
 
   docker-compose = templatefile("${path.module}/configs/tpl.docker-compose.yaml", {
     DEFAULT_USER = local.default-user
     DEVICE_NAME  = local.device-name
+    YC_GROUP_ID  = yandex_logging_group.group.id
 
     ASMAN_API_GATEWAY_IMAGE = var.gateway-docker-image
 
@@ -61,6 +85,9 @@ module "vm-instance" {
     POSTGRES_DB          = var.postgres-secrets.db
     POSTGRES_USER        = var.postgres-secrets.user
     POSTGRES_PASSWORD    = var.postgres-secrets.password
+
+    FLUENT_BIT_HOST = "fluentbit"
+    FLUENT_BIT_PORT = 24224
   })
 
   sa-id       = yandex_iam_service_account.sa-image-puller.id
