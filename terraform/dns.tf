@@ -13,7 +13,7 @@ resource "yandex_dns_zone" "domain-zone" {
 # Создание ресурсной записи типа А на наш instance
 resource "yandex_dns_recordset" "record" {
   zone_id = yandex_dns_zone.domain-zone.id
-  name    = "${var.domain.subdomain}.${var.domain.domain-zone}."
+  name    = "${local.domain}."
   type    = "A"
   ttl     = 600
   data    = ["${module.vm-instance.external_ip}"]

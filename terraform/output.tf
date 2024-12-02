@@ -1,5 +1,9 @@
+locals {
+  domain = "${var.domain.subdomain}.${var.domain.domain-zone}"
+}
+
 output "external_domain" {
-  value = "${var.domain.subdomain}.${var.domain.domain-zone}"
+  value = local.domain
 }
 
 output "external_ip" {
@@ -7,5 +11,5 @@ output "external_ip" {
 }
 
 output "ssh-connect" {
-  value = "ssh -i ycvm ${local.default-user}@${var.domain.subdomain}.${var.domain.domain-zone}"
+  value = "ssh -i ycvm ${local.default-user}@${local.domain}"
 }

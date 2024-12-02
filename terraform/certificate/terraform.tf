@@ -1,27 +1,22 @@
-locals {
-  cloud_name  = "ikemurami-cloud"
-  folder_name = "asman-debug"
-}
-
 terraform {
   required_providers {
     yandex = {
       source = "yandex-cloud/yandex"
     }
-    cloudinit = {
-      source = "hashicorp/cloudinit"
+    local = {
+      source = "hashicorp/local"
     }
   }
   required_version = ">= 0.13"
 }
 
 data "yandex_resourcemanager_cloud" "cloud" {
-  name = local.cloud_name
+  name = var.cloud-name
 }
 
 data "yandex_resourcemanager_folder" "folder" {
   cloud_id = data.yandex_resourcemanager_cloud.cloud.id
-  name     = local.folder_name
+  name     = var.folder-name
 }
 
 provider "yandex" {

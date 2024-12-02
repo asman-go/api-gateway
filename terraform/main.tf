@@ -30,6 +30,14 @@ resource "yandex_resourcemanager_folder_iam_binding" "logging-writer" {
   provider = yandex.with-project-info
 }
 
+resource "yandex_resourcemanager_folder_iam_binding" "certificate-downloader" {
+  folder_id = data.yandex_resourcemanager_folder.folder.id
+  role      = "certificate-manager.certificates.downloader"
+  members   = ["serviceAccount:${yandex_iam_service_account.sa-image-puller.id}"]
+
+  provider = yandex.with-project-info
+}
+
 # Logging
 
 resource "yandex_logging_group" "group" {
@@ -39,26 +47,30 @@ resource "yandex_logging_group" "group" {
   provider = yandex.with-project-info
 }
 
+# Certificate
+
+data "yandex_cm_certificate" "certificate" {
+  name            = "cert-domain"
+  wait_validation = true
+
+  provider = yandex.with-project-info
+}
+
+data "yandex_cm_certificate_content" "certificate" {
+  depends_on = [data.yandex_cm_certificate.certificate]
+
+  certificate_id  = data.yandex_cm_certificate.certificate.id
+  wait_validation = true
+
+  provider = yandex.with-project-info
+}
+
 # VM with docker compose
 
 module "vm-instance" {
   source = "./vm-instance"
 
-  cloud-init = templatefile("${path.module}/configs/cloud-init.tpl.yaml", {
-    DEFAULT_USER   = local.default-user
-    SSH_PUBLIC_KEY = file("${path.module}/ycvm.pub")
-
-    POSTGRES_USER     = var.postgres-secrets.user
-    POSTGRES_PASSWORD = var.postgres-secrets.password
-
-    GW_LOCAL_HOST = var.gateway-config.local-host
-    GW_LOCAL_PORT = var.gateway-config.local-port
-
-    YC_GROUP_ID = yandex_logging_group.group.id
-
-    FLUENT_BIT_HOST = "fluentbit"
-    FLUENT_BIT_PORT = 24224
-  })
+  cloud-init = data.cloudinit_config.cloud-init.rendered
 
   docker-compose = templatefile("${path.module}/configs/tpl.docker-compose.yaml", {
     DEFAULT_USER = local.default-user
@@ -88,6 +100,9 @@ module "vm-instance" {
 
     FLUENT_BIT_HOST = "fluentbit"
     FLUENT_BIT_PORT = 24224
+
+    CERT_FULLCHAIN_PATH = local.cert-fullchain-path
+    CERT_PRIVKEY_PATH   = local.cert-privkey-path
   })
 
   sa-id       = yandex_iam_service_account.sa-image-puller.id
@@ -102,6 +117,8 @@ module "vm-instance" {
 
   depends_on = [
     yandex_iam_service_account.sa-image-puller,
-    yandex_vpc_subnet.asman-subnet-a
+    yandex_vpc_subnet.asman-subnet-a,
+    # module.certificate
   ]
 }
+
