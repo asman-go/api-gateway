@@ -1,0 +1,9 @@
+.pytest_cache
+.git
+.venv
+Makefile
+terraform
+deploy
+client
+__pycache__
+tests
