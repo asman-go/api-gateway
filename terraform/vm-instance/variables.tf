@@ -8,9 +8,17 @@ variable "docker-compose" {
   type        = string
 }
 
-variable "disk-name" {
-  description = "Postgres disk name"
+variable "device-name" {
+  description = "Postgres disk name: этот параметр для провязки диска в конфигурации и внутри контейнера / docker compose"
   type        = string
+}
+
+variable "postgres-password-hash" {
+  # Сменили пароль — диск с данными пересоздаем?
+  # Пока не знаю как лучше
+  description = "Хеш пароля к Postgres"
+  type        = string
+  sensitive   = true
 }
 
 variable "sa-id" {

@@ -1,5 +1,5 @@
 IMAGE_NAME = "api-gateway"
-IMAGE_VERSION = "1.1"
+IMAGE_VERSION = "1.4"
 
 IMAGE_REGISTRY = "cr.yandex/crpnqn6joccbivjbkb27"
 

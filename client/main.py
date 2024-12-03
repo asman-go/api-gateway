@@ -20,7 +20,7 @@ def parse_response(response_model: Type):
 
 class GatewayClient(uplink.Consumer):
     @parse_response(Mapping)
-    @uplink.get('/api/healthcheck')
+    @uplink.get('/api/public/healthcheck')
     def _ping(
         self,
     ):...
@@ -56,7 +56,7 @@ class GatewayClient(uplink.Consumer):
         )
 
 
-if __name__ == '__main__':
+def local():
     session = Session()
     session.headers.update({'Authorization': 'user-api-key'})
 
@@ -68,6 +68,28 @@ if __name__ == '__main__':
         'http://localhost:7860',
     )
 
-    print('GET /healthcheck', public_client.ping())
+    print('GET /public/healthcheck', public_client.ping())
     print('GET /integrations/fb/webhook', public_client.facebook_webhook_verify(challenge='mychallenge', mode='test', verify_token='UNDEFINED'))
-    print('POST /integrations/fb/webhook', public_client.facebook_ct_event_send(facebook_secret='UNDEFINED', body='{"event":"test"}'))
+    print('POST /integrations/fb/webhook', public_client.facebook_ct_event_send(facebook_secret='UNDEFINED', body='{"object":"certificate_transparency","entry":[]}'))
+
+
+def remote():
+    session = Session()
+    session.headers.update({'Authorization': 'user-api-key-secret'})
+
+    user_client = GatewayClient(
+        'https://api.asman.ikemurami.com',
+        client=session,
+    )
+    public_client = GatewayClient(
+        'https://api.asman.ikemurami.com',
+    )
+
+    print('GET /public/healthcheck', public_client.ping())
+    print('GET /integrations/fb/webhook', public_client.facebook_webhook_verify(challenge='mychallenge', mode='test', verify_token='verification-token'))
+    print('POST /integrations/fb/webhook', public_client.facebook_ct_event_send(facebook_secret='client-secret', body='{"object":"certificate_transparency","entry":[]}'))
+
+
+if __name__ == '__main__':
+    # local()
+    remote()

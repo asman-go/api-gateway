@@ -28,13 +28,16 @@ async def webhook(
             verify_token: Annotated[str, Query(alias='hub.verify_token')]
         ):
     config = FacebookConfig()
-    print('Receive Webhook Verification Request. hub.mode is', mode, config.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN)
+    print(
+        'Receive Webhook Verification Request. hub.mode is',
+        mode,
+        # config.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN,
+        'challenge is',
+        challenge
+    )
 
     if verify_token == config.FACEBOOK_WEBHOOK_VERIFICATION_TOKEN:
-        return {
-            'statusCode': 200,
-            'body': challenge
-        }
+        return Response(status_code=200, content=challenge, media_type='text/plain')
 
     return Response(status_code=401)
 
@@ -48,8 +51,8 @@ async def new_ct_event(
     postgres_config = PostgresConfig()
 
     body = (await request.body()).decode()
-
-    if signature == hmac_digest(facebook_config.FACEBOOK_CLIENT_SECRET, body):
+    # print('signature:', hmac_digest(facebook_config.FACEBOOK_CLIENT_SECRET, body))
+    if signature.split('=')[1] == hmac_digest(facebook_config.FACEBOOK_CLIENT_SECRET, body):
         print('FB WebHook body event (TODO):', body)
         ct_event = pydantic.TypeAdapter(
             FacebookCtEvent
@@ -59,7 +62,7 @@ async def new_ct_event(
 
         print('FB WebHook parsed event (TODO):', ct_event)
         use_case = NewCtEventUseCase(None, postgres_config)
-        status = use_case.execute(ct_event)
+        status = await use_case.execute(ct_event)
 
         return Response(status_code=200) if status else Response(status_code=502)
 

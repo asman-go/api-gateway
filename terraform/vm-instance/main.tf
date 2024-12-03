@@ -14,12 +14,22 @@ resource "yandex_vpc_address" "addr" {
   }
 }
 
+resource "terraform_data" "postgres-password-hash" {
+  input = var.postgres-password-hash
+}
+
 # Диск для данных PostgreSQL
 resource "yandex_compute_disk" "postgres_data_disk" {
   name = "pg-data-disk"
   type = "network-hdd"
   zone = var.zone
   size = 10
+
+  lifecycle {
+    replace_triggered_by = [
+      terraform_data.postgres-password-hash
+    ]
+  }
 }
 
 resource "yandex_compute_instance" "instance" {
@@ -43,7 +53,7 @@ resource "yandex_compute_instance" "instance" {
 
   secondary_disk {
     disk_id     = yandex_compute_disk.postgres_data_disk.id
-    device_name = var.disk-name
+    device_name = var.device-name
   }
 
   network_interface {

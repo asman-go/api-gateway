@@ -38,10 +38,11 @@ def test_check_facebook_webhook(integrations_client, facebook_config):
     )
 
     assert response.status_code == 200
-    assert response.json() == {
-        'statusCode': 200,
-        'body': CHALLENGE,
-    }
+    assert response.text == CHALLENGE
+    # assert response.json() == {
+    #     'statusCode': 200,
+    #     'body': CHALLENGE,
+    # }
 
     response = integrations_client.get(
         FACEBOOK_WEBHOOK_PATH,

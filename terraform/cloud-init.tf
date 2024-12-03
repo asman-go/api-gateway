@@ -19,6 +19,7 @@ locals {
       # Commands to run at the end of the cloud-init process
       "runcmd" : [
         "echo 'Hello, World!' > /etc/hello-world.txt",
+        "chmod 666 /var/run/docker.sock",
       ],
       "write_files" : [
         {
@@ -30,6 +31,7 @@ locals {
           "content" : join("\n", data.yandex_cm_certificate_content.certificate.certificates)
         },
         {
+          # Задаем пароль при инициализации базы
           "path" : "/etc/init.sql",
           "content" : templatefile("${path.module}/configs/postgres/init.sql", {
             POSTGRES_USER     = var.postgres-secrets.user

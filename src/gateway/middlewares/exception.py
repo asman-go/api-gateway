@@ -18,6 +18,5 @@ class ExceptionMiddleware(BaseHTTPMiddleware):
             return response
 
         except Exception as e:
-
-            self.logger.error(e)
-            return None
+            self.logger.error(f'Exception: {e}')
+            return Response(status_code=500, content='Something wrong')

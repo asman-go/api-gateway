@@ -4,6 +4,17 @@
 2. `make plan`
 3. `make apply`
 
+## Для генерации секретов
+
+```python
+import random
+import string
+
+print(
+    ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(32))
+)
+```
+
 # Проверить, что все ОК
 
 ```

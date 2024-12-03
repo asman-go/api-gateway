@@ -105,11 +105,12 @@ module "vm-instance" {
     CERT_PRIVKEY_PATH   = local.cert-privkey-path
   })
 
-  sa-id       = yandex_iam_service_account.sa-image-puller.id
-  sg-id       = yandex_vpc_security_group.instance-security-group.id
-  subnet-name = yandex_vpc_subnet.asman-subnet-a.name
-  zone        = var.zone
-  disk-name   = local.device-name
+  sa-id                  = yandex_iam_service_account.sa-image-puller.id
+  sg-id                  = yandex_vpc_security_group.instance-security-group.id
+  subnet-name            = yandex_vpc_subnet.asman-subnet-a.name
+  zone                   = var.zone
+  device-name            = local.device-name
+  postgres-password-hash = sha256("${var.postgres-secrets.password}-${var.gateway-config.environment}")
 
   providers = {
     yandex = yandex.with-project-info

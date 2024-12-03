@@ -1,4 +1,4 @@
-gateway-docker-image = "cr.yandex/crpnqn6joccbivjbkb27/api-gateway:1.1"
+gateway-docker-image = "cr.yandex/crpnqn6joccbivjbkb27/api-gateway:1.4"
 
 gateway-config = {
   environment = "testing"
