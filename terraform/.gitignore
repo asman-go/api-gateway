@@ -1,9 +1,0 @@
-# Custom
-.terraform.lock.hcl
-.terraform.tfstate.lock.info
-.terraform
-terraform.tfstate
-terraform.tfstate*
-secrets.tfvars
-ycvm
-ycvm.pub
