@@ -1,5 +1,5 @@
 IMAGE_NAME = "api-gateway"
-IMAGE_VERSION = "1.4"
+IMAGE_VERSION = "1.5"
 
 IMAGE_REGISTRY = "cr.yandex/crpnqn6joccbivjbkb27"
 
@@ -33,7 +33,7 @@ test:
 
 build:
 	@echo 'Собираем докер-образ с гейтвеем'
-	@docker build -f deploy/Dockerfile -t ${IMAGE_FULL_NAME} .
+	@docker buildx build --no-cache -f deploy/Dockerfile -t ${IMAGE_FULL_NAME} .
 
 push:
 	@echo 'Загружаем образ в registry'
