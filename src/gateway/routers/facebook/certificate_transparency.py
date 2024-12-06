@@ -27,9 +27,9 @@ async def subscribe(domains: Annotated[List[str], Body(embed=True)]):
     postgres_config = PostgresConfig()
     use_case = SubscribeNewDomainsUseCase(facebook_config, postgres_config)
 
-    _domains = await use_case.execute(domains)
+    status = await use_case.execute(domains)
 
-    return Response(status_code=200) if _domains else Response(status_code=409)
+    return Response(status_code=200) if status else Response(status_code=409)
 
 
 @router.put('/unsubscribe')
