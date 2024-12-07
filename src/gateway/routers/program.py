@@ -12,6 +12,7 @@ from asman.domains.bugbounty_programs.api import (
     ProgramId,
     ProgramData,
     Program,
+    AssetType
 )
 
 from asman.core.adapters.db import PostgresConfig
@@ -71,6 +72,21 @@ async def create(program: Annotated[ProgramData, Body(embed=True)]):
     return {
         'id': program_id.id,
     }
+
+
+@router.post('/{program_id}/run')
+async def run(program_id: int):
+    config = PostgresConfig()
+
+    assets = filter(
+        lambda asset: asset.type == AssetType.ASSET_WEB and asset.in_scope and asset.is_paid,
+        (
+            await ReadProgramByIdUseCase(None, config)
+            .execute(ProgramId(id=program_id))
+        ).data.assets
+    )
+
+    return assets
 
 
 @router.put('/{program_id}')

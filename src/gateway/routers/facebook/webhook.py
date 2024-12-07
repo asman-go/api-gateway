@@ -4,8 +4,8 @@ from typing import Annotated
 import json
 
 from asman.gateway.core.utils import hmac_digest
-from asman.domains.facebook_api.use_cases import NewCtEventUseCase
-from asman.domains.facebook_api.api import FacebookCtEvent
+from asman.domains.domains.use_cases import NewCtEventUseCase
+from asman.domains.domains.api import FacebookCtEvent
 from asman.core.adapters.db import PostgresConfig
 from asman.core.adapters.clients.facebook import FacebookConfig
 

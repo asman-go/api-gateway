@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Response
 from typing import Annotated, List
 
 from asman.core.adapters.clients.facebook import FacebookConfig
-from asman.domains.facebook_api.use_cases import (
+from asman.domains.domains.use_cases import (
     SubscribeNewDomainsUseCase,
     UnsubscribeDomainsUseCase,
 )
