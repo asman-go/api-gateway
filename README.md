@@ -1,14 +1,9 @@
 # api-gateway
 Asman Compute Engine API Gateway
 
-# Build docker image
-
-```
-$ make build
-$ make push
-```
-
 # Develope
+
+Все команды ниже обернул в `Makefile`.
 
 ## Prepare python venv
 
