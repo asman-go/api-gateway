@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Body, Response
-from typing import Annotated
+from typing import Annotated, List
 
 from asman.domains.bugbounty_programs.use_cases import (
     CreateProgramUseCase,
@@ -7,11 +7,16 @@ from asman.domains.bugbounty_programs.use_cases import (
     ReadProgramUseCase,
     ReadProgramByIdUseCase,
     UpdateProgramUseCase,
+    AddAssetsUseCase,
+    RemoveAssetsUseCase,
 )
 from asman.domains.bugbounty_programs.api import (
     ProgramData,
     Program,
-    AssetType
+    AssetType,
+    Asset,
+    AddAssetsRequest,
+    RemoveAssetsRequest,
 )
 
 from asman.core.adapters.db import PostgresConfig
@@ -33,9 +38,7 @@ async def read_all():
     use_case = ReadProgramUseCase(None, config)
     programs = await use_case.execute()
 
-    return {
-        'programs': programs,
-    }
+    return programs
 
 
 @router.get('/{program_id}')
@@ -95,3 +98,23 @@ async def update(program_id, program: Annotated[ProgramData, Body(embed=True)]):
     ))
 
     return updated_program
+
+
+@router.put('/{program_id}/assets')
+async def add_assets(program_id, assets: Annotated[List[Asset], Body(embed=True)]):
+    config = PostgresConfig()
+    use_case = AddAssetsUseCase(None, config)
+
+    await use_case.execute(AddAssetsRequest(program_id=program_id, assets=assets))
+
+    return Response(status_code=201)
+
+
+@router.put('/{program_id}/assets/remove')
+async def remove_assets(program_id, assets: Annotated[List[Asset], Body(embed=True)]):
+    config = PostgresConfig()
+    use_case = RemoveAssetsUseCase(None, config)
+
+    await use_case.execute(RemoveAssetsRequest(program_id=program_id, assets=assets))
+
+    return Response(status_code=200)
