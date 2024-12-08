@@ -1,7 +1,6 @@
 import pytest
 from copy import deepcopy
 from asman.domains.bugbounty_programs.api import (
-    ProgramId,
     ProgramData,
     Program,
 )
@@ -65,13 +64,7 @@ def test_program_read(private_client, program_id):
 
     assert response.status_code == 200
 
-    response = response.json()
-
-    assert 'program' in response
-
-    program = response['program']
-
-    assert Program(**program)
+    assert Program(**response.json())
 
 
 def test_program_update(private_client, program_id, program_data):
@@ -83,18 +76,11 @@ def test_program_update(private_client, program_id, program_data):
     })
 
     assert response.status_code == 200
+    assert Program(**response.json())
 
-    response = response.json()
+    program = Program(**response.json())
 
-    assert 'program' in response
-
-    program = response['program']
-
-    assert Program(**program)
-
-    program = Program(**program)
-
-    assert program.id.id == program_id
+    assert program.id == program_id
     assert program.data.program_name == 'NEW_VALUE'
 
 
@@ -110,21 +96,16 @@ def test_program_read_all(private_client):
 def test_program_delete(private_client, program_id_to_delete):
     response = private_client.get(f'/program/{program_id_to_delete}')
 
-    response = response.json()
-    program = response['program']
+    program = response.json()
 
     assert program
 
     response = private_client.delete(f'/program/{program_id_to_delete}')
 
     assert response.status_code == 200
-    assert response.json() == {
-        'status': True
-    }
 
     response = private_client.get(f'/program/{program_id_to_delete}')
 
-    response = response.json()
-    program = response['program']
+    program = response.json()
 
     assert not program

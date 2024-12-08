@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Response
 from typing import Annotated
 
 from asman.domains.bugbounty_programs.use_cases import (
@@ -9,7 +9,6 @@ from asman.domains.bugbounty_programs.use_cases import (
     UpdateProgramUseCase,
 )
 from asman.domains.bugbounty_programs.api import (
-    ProgramId,
     ProgramData,
     Program,
     AssetType
@@ -43,22 +42,18 @@ async def read_all():
 async def read_by_id(program_id: int):
     config = PostgresConfig()
     use_case = ReadProgramByIdUseCase(None, config)
-    program = await use_case.execute(ProgramId(id=program_id))
+    program = await use_case.execute(program_id)
 
-    return {
-        'program': program,
-    }
+    return program
 
 
 @router.delete('/{program_id}')
 async def delete(program_id: int):
     config = PostgresConfig()
     use_case = DeleteProgramUseCase(None, config)
-    status = await use_case.execute(ProgramId(id=program_id))
+    status = await use_case.execute(program_id)
 
-    return {
-        'status': status,
-    }
+    return Response(status_code=200) if status else Response(status_code=409) 
 
 
 @router.post('/')
@@ -70,7 +65,7 @@ async def create(program: Annotated[ProgramData, Body(embed=True)]):
     program_id = await use_case.execute(program)
 
     return {
-        'id': program_id.id,
+        'id': program_id,
     }
 
 
@@ -82,7 +77,7 @@ async def run(program_id: int):
         lambda asset: asset.type == AssetType.ASSET_WEB and asset.in_scope and asset.is_paid,
         (
             await ReadProgramByIdUseCase(None, config)
-            .execute(ProgramId(id=program_id))
+            .execute(program_id)
         ).data.assets
     )
 
@@ -95,10 +90,8 @@ async def update(program_id, program: Annotated[ProgramData, Body(embed=True)]):
     use_case = UpdateProgramUseCase(None, config)
 
     updated_program = await use_case.execute(Program(
-        id=ProgramId(id=program_id),
+        id=program_id,
         data=program,
     ))
 
-    return {
-        'program': updated_program,
-    }
+    return updated_program
