@@ -10,6 +10,7 @@ from asman.domains.bugbounty_programs.use_cases import (
     AddAssetsUseCase,
     RemoveAssetsUseCase,
 )
+from asman.domains.domains.use_cases import DomainsFromCertsUseCase
 from asman.domains.bugbounty_programs.api import (
     ProgramData,
     Program,
@@ -20,6 +21,7 @@ from asman.domains.bugbounty_programs.api import (
 )
 
 from asman.core.adapters.db import PostgresConfig
+from asman.domains.domains.utils import check_domain
 
 
 router = APIRouter()
@@ -77,12 +79,21 @@ async def run(program_id: int):
     config = PostgresConfig()
 
     assets = filter(
-        lambda asset: asset.type == AssetType.ASSET_WEB and asset.in_scope and asset.is_paid,
+        lambda asset: (
+            asset.type == AssetType.ASSET_WEB
+            and asset.in_scope and asset.is_paid
+            and check_domain(asset.value)
+        ),
         (
             await ReadProgramByIdUseCase(None, config)
             .execute(program_id)
         ).data.assets
     )
+
+    crtsh_usecase = DomainsFromCertsUseCase(None, config)
+
+    domains = list(map(lambda asset: asset.value, assets))
+    await crtsh_usecase.execute(list(domains))
 
     return assets
 
