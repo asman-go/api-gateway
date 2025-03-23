@@ -2,7 +2,7 @@ import pytest
 
 import json
 from asman.gateway.core.utils import hmac_digest
-from asman.domains.domains.api import FacebookCtEvent, NewCertificateEvent
+from asman.domains.services.api import FacebookCtEvent, NewCertificateEvent
 
 
 FACEBOOK_WEBHOOK_PATH = '/fb/webhook'

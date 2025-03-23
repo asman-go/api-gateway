@@ -3,17 +3,17 @@ services:
   asman-postgres:
     image: postgres:alpine
     restart: always
+    ports:
+      - 6432:5432
     environment:
       POSTGRES_DB: my_db
       POSTGRES_USER: my_user
       POSTGRES_PASSWORD: my_password
+    command: >
+      postgres -c log_statement=all
     volumes:
       - ./configs/postgres:/docker-entrypoint-initdb.d
-      - ./data/postgres:/var/lib/postgresql/data
-    ports:
-      - 6432:5432
-    networks:
-      - asman-network
+      - postgres_data:/var/lib/postgresql/data
 
-networks:
-  asman-network:
+volumes:
+  postgres_data:

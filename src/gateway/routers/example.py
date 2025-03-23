@@ -3,16 +3,18 @@ from fastapi import APIRouter
 from asman.domains.example import (
     ExampleUseCase,
     Request,
+    Config,
 )
 
-from asman.core.adapters.db import DynamoDBConfig
 
 router = APIRouter()
 
+
 @router.get('/')
 async def start():
-    config = DynamoDBConfig()
-    use_case = ExampleUseCase(None, config)
+    use_case = ExampleUseCase(
+        Config(some_value='123456')
+    )
     request = Request(data='test1')
     response = use_case.execute(request)
 

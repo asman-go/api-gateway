@@ -2,6 +2,7 @@ from fastapi import APIRouter, Body, Response
 from typing import Annotated, List
 
 from asman.domains.bugbounty_programs.use_cases import (
+    GetAssetsUseCase,
     CreateProgramUseCase,
     DeleteProgramUseCase,
     ReadProgramUseCase,
@@ -10,18 +11,20 @@ from asman.domains.bugbounty_programs.use_cases import (
     AddAssetsUseCase,
     RemoveAssetsUseCase,
 )
-from asman.domains.domains.use_cases import DomainsFromCertsUseCase
+from asman.domains.services.use_cases import DomainsFromCertsUseCase
 from asman.domains.bugbounty_programs.api import (
-    ProgramData,
+    NewProgram,
+    ProgramId,
     Program,
     AssetType,
     Asset,
+    NewAsset,
     AddAssetsRequest,
     RemoveAssetsRequest,
+    SearchByID,
 )
 
-from asman.core.adapters.db import PostgresConfig
-from asman.domains.domains.utils import check_domain
+from asman.domains.services.api import check_domain
 
 
 router = APIRouter()
@@ -36,8 +39,7 @@ router = APIRouter()
 
 @router.get('/')
 async def read_all():
-    config = PostgresConfig()
-    use_case = ReadProgramUseCase(None, config)
+    use_case = ReadProgramUseCase()
     programs = await use_case.execute()
 
     return programs
@@ -45,87 +47,95 @@ async def read_all():
 
 @router.get('/{program_id}')
 async def read_by_id(program_id: int):
-    config = PostgresConfig()
-    use_case = ReadProgramByIdUseCase(None, config)
-    program = await use_case.execute(program_id)
+    use_case = ReadProgramByIdUseCase()
+    program = await use_case.execute(
+        SearchByID(id=program_id)
+    )
 
     return program
 
 
 @router.delete('/{program_id}')
 async def delete(program_id: int):
-    config = PostgresConfig()
-    use_case = DeleteProgramUseCase(None, config)
-    status = await use_case.execute(program_id)
+    use_case = DeleteProgramUseCase()
+    deleted_program_id = await use_case.execute(
+        SearchByID(id=program_id)
+    )
 
-    return Response(status_code=200) if status else Response(status_code=409) 
+    return Response(status_code=200) if deleted_program_id.program_id else Response(status_code=409) 
 
 
 @router.post('/')
-async def create(program: Annotated[ProgramData, Body(embed=True)]):
-    config = PostgresConfig()
-    use_case = CreateProgramUseCase(None, config)
+async def create(program: Annotated[NewProgram, Body(embed=True)]):
+    use_case = CreateProgramUseCase()
     # print('Create program', program)
 
     program_id = await use_case.execute(program)
 
     return {
-        'id': program_id,
+        'id': program_id.program_id,
     }
+
+
+def normalize_domain(domain: str) -> str:
+    if domain.startswith('*.'):
+        return domain[2:]
+
+    if domain.startswith('.'):
+        return domain[1:]
+
+    return domain
 
 
 @router.post('/{program_id}/run')
 async def run(program_id: int):
-    config = PostgresConfig()
-
+    
+    assets = await GetAssetsUseCase().execute(
+        ProgramId(program_id=program_id)
+    )
     assets = filter(
         lambda asset: (
             asset.type == AssetType.ASSET_WEB
             and asset.in_scope and asset.is_paid
             and check_domain(asset.value)
         ),
-        (
-            await ReadProgramByIdUseCase(None, config)
-            .execute(program_id)
-        ).data.assets
+        assets
     )
+    domains = map(
+        lambda asset: normalize_domain(asset.value),
+        assets
+    )
+    crtsh_usecase = DomainsFromCertsUseCase()
+    new_domains = await crtsh_usecase.execute(list(domains))
 
-    crtsh_usecase = DomainsFromCertsUseCase(None, config)
-
-    domains = list(map(lambda asset: asset.value, assets))
-    await crtsh_usecase.execute(list(domains))
-
-    return assets
+    return new_domains
 
 
 @router.put('/{program_id}')
-async def update(program_id, program: Annotated[ProgramData, Body(embed=True)]):
-    config = PostgresConfig()
-    use_case = UpdateProgramUseCase(None, config)
+async def update(program_id, program: Annotated[NewProgram, Body(embed=True)]):
+    use_case = UpdateProgramUseCase()
 
-    updated_program = await use_case.execute(Program(
+    updated_program_id = await use_case.execute(Program(
         id=program_id,
-        data=program,
+        **program.model_dump(),
     ))
 
-    return updated_program
+    return updated_program_id
 
 
 @router.put('/{program_id}/assets')
-async def add_assets(program_id, assets: Annotated[List[Asset], Body(embed=True)]):
-    config = PostgresConfig()
-    use_case = AddAssetsUseCase(None, config)
+async def add_assets(program_id, assets: Annotated[List[NewAsset], Body(embed=True)]):
+    use_case = AddAssetsUseCase()
 
-    await use_case.execute(AddAssetsRequest(program_id=program_id, assets=assets))
+    added_assets =  await use_case.execute(AddAssetsRequest(program_id=program_id, assets=assets))
 
     return Response(status_code=201)
 
 
-@router.put('/{program_id}/assets/remove')
-async def remove_assets(program_id, assets: Annotated[List[Asset], Body(embed=True)]):
-    config = PostgresConfig()
-    use_case = RemoveAssetsUseCase(None, config)
+# @router.put('/{program_id}/assets/remove')
+# async def remove_assets(program_id, assets: Annotated[List[Asset], Body(embed=True)]):
+#     use_case = RemoveAssetsUseCase()
 
-    await use_case.execute(RemoveAssetsRequest(program_id=program_id, assets=assets))
+#     await use_case.execute(RemoveAssetsRequest(program_id=program_id, assets=assets))
 
-    return Response(status_code=200)
+#     return Response(status_code=200)

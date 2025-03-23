@@ -57,7 +57,7 @@ class GatewayAPI(object):
         user_app.add_middleware(AuthMiddleware, app_name=app_name, api_key=self.config.api_secrets.USER_API_KEY)
         user_app.include_router(ProgramRouter, prefix='/program')
         user_app.include_router(ExampleRouter, prefix='/example')
-        user_app.include_router(CertificateTransparencyRouter, prefix='/ctlog')
+        # user_app.include_router(CertificateTransparencyRouter, prefix='/ctlog')
 
         return user_app
 
@@ -71,7 +71,7 @@ class GatewayAPI(object):
     def _integrations_api(self, app_name: str) -> FastAPI:
 
         integrations_app = self._base_fast_api_app(app_name)
-        integrations_app.include_router(FacebookWebhookRouter, prefix='/fb')
+        # integrations_app.include_router(FacebookWebhookRouter, prefix='/fb')
 
         return integrations_app
 
