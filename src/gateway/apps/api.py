@@ -15,8 +15,8 @@ from asman.gateway.routers import (
     ProgramRouter,
     DevChecksRouter,
     ExampleRouter,
-    FacebookWebhookRouter,
-    CertificateTransparencyRouter,
+    # FacebookWebhookRouter,
+    # CertificateTransparencyRouter,
 )
 
 

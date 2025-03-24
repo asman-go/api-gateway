@@ -1,3 +1,5 @@
+# Тестовое окружение то же, что и в core
+
 services:
   # postgres для тестов
   asman-postgres:
@@ -14,6 +16,15 @@ services:
     volumes:
       - ./configs/postgres:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
+
+  # dynamodb для тестов
+  dynamodb:
+    image: amazon/dynamodb-local
+    restart: always
+    environment:
+      DYNAMODB_LOCAL_LOG_LEVEL: DEBUG
+    ports:
+      - 8000:8000
 
 volumes:
   postgres_data:

@@ -20,4 +20,5 @@ t-deploy:
 	@docker compose -f deploy/testing.docker-compose.yml up
 
 test:
+	@python -m pip install -r requirements.test.txt
 	@python -m pytest .

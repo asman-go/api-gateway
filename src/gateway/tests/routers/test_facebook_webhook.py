@@ -26,7 +26,7 @@ def fb_ct_event():
     )
 
 
-def test_check_facebook_webhook(integrations_client, facebook_config):
+def _test_check_facebook_webhook(integrations_client, facebook_config):
     CHALLENGE = '12345'
     response = integrations_client.get(
         FACEBOOK_WEBHOOK_PATH,
@@ -56,7 +56,7 @@ def test_check_facebook_webhook(integrations_client, facebook_config):
     assert response.status_code == 401
 
 
-def te1st_new_facebook_ct_event(integrations_client, facebook_config):
+def _test_new_facebook_ct_event(integrations_client, facebook_config):
     body = json.dumps({'key': 'value'})
     response = integrations_client.post(
         FACEBOOK_WEBHOOK_PATH,

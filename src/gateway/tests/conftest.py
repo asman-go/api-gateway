@@ -1,93 +1,85 @@
 import pytest
+import pytest_asyncio
 
-from fastapi.testclient import TestClient
+from asman.domains.bugbounty_programs.api import (
+    AssetType,
+    NewProgram,
+    NewAsset,
+    AddAssetsRequest,
+)
+from asman.domains.bugbounty_programs.use_cases import (
+    CreateProgramUseCase,
+    AddAssetsUseCase,
+)
 
 from asman.core.adapters.tests import facebook_config
-from asman.gateway.apps.api import GatewayAPI
-from asman.gateway.core.configs import ApiGatewayConfig, ApiKeyConfig, AppGatewayConfig
+from asman.core.adapters.db.postgresql.tests import init_postgres_envs
+from asman.core.adapters.db.dynamodb.tests import init_dynamodb_envs
+
+from .conftest_config import (
+    api_config, api_key_config, app_config
+)
+
+from .conftest_clients import (
+    gateway_app,
+    admin_client, integrations_client, public_client, private_client,
+)
 
 
 @pytest.fixture
-def postgres_config(monkeypatch):
-    monkeypatch.setenv('POSTGRES_DB', 'my_db')
-    monkeypatch.setenv('POSTGRES_USER', 'my_user')
-    monkeypatch.setenv('POSTGRES_PASSWORD', 'my_password')
-    monkeypatch.setenv('POSTGRES_HOST', 'localhost')
-    monkeypatch.setenv('POSTGRES_PORT', '6432')
-
-
-@pytest.fixture
-def api_config(monkeypatch):
-    monkeypatch.setenv('HTTP_HOST', 'localhost')
-    monkeypatch.setenv('API_GATEWAY_HTTP_PORT', '8080')
-
-    return ApiGatewayConfig()
-
-
-@pytest.fixture
-def api_key_config(monkeypatch):
-    monkeypatch.setenv('USER_API_KEY', 'user-api-key')
-    monkeypatch.setenv('ADMIN_API_KEY', 'admin-api-key')
-
-    return ApiKeyConfig()
-
-
-@pytest.fixture
-def app_config(api_config, api_key_config, facebook_config):
-    return AppGatewayConfig(
-        environment=api_config.ENVIRONMENT,
-        logger_name=api_config.API_GATEWAY_LOGGER_NAME,
-        api_secrets=api_key_config,
-        fb_secrets=facebook_config,
+def new_program():
+    return NewProgram(
+        program_name='Name',
+        program_site='https://example.com/',
+        platform='test',
+        notes='Notes',
     )
 
 
 @pytest.fixture
-def gateway_app(app_config, postgres_config):
-    return GatewayAPI(app_config).start()
+def new_program_delete():
+    return NewProgram(
+        program_name='Name',
+        program_site='https://example.com/',
+        platform='test',
+        notes='Notes',
+    )
 
 
 @pytest.fixture
-def private_client(gateway_app, app_config):
-    client = TestClient(
-        gateway_app,
-        headers={
-            'Authorization': app_config.api_secrets.USER_API_KEY,
-        },
-    )
-    client.base_url = client.base_url.join('/api/private')
-
-    return client
-
-
-@pytest.fixture
-def admin_client(gateway_app, app_config):
-    client = TestClient(
-        gateway_app,
-        headers={
-            'Authorization': app_config.api_secrets.ADMIN_API_KEY,
-        },
-    )
-    client.base_url = client.base_url.join('/api/admin')
-
-    return client
+def new_assets():
+    return [
+        NewAsset(
+            value='example.com',
+            type=AssetType.ASSET_WEB,
+            in_scope=True,
+            is_paid=False,
+        ),
+        NewAsset(
+            value='192.168.0.1',
+            type=AssetType.ASSET_IP,
+            in_scope=True,
+            is_paid=True,
+        ),
+        NewAsset(
+            value='https://api.example.com/',
+            type=AssetType.ASSET_API,
+            in_scope=False,
+            is_paid=False,
+        ),
+    ]
 
 
-@pytest.fixture
-def public_client(gateway_app):
-    client = TestClient(
-        gateway_app,
-    )
-    client.base_url = client.base_url.join('/api/public')
-
-    return client
+@pytest_asyncio.fixture
+async def program_id(new_program) -> int:
+    _new_program_id = await CreateProgramUseCase().execute(new_program)
+    return _new_program_id.program_id
 
 
-@pytest.fixture
-def integrations_client(gateway_app):
-    client = TestClient(
-        gateway_app,
-    )
-    client.base_url = client.base_url.join('/api/integrations')
-
-    return client
+@pytest_asyncio.fixture
+async def program_with_assets(program_id, new_assets) -> int:
+    await AddAssetsUseCase().execute(AddAssetsRequest(
+        program_id=program_id,
+        assets=new_assets,
+    ))
+    return program_id
