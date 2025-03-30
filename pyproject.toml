@@ -30,14 +30,18 @@ Issues = "https://github.com/asman-go/api-gateway/issues"
 
 # dependencies
 [tool.hatch.metadata.hooks.requirements_txt]
-files = ["requirements.txt"]
+files = [
+    "requirements.txt",
+    "src/gateway/requirements.txt",
+    "src/background/requirements.txt"
+]
 
 [tool.hatch.build.targets.wheel]
 only-include = [
     "src/gateway",
-    "src/asmanqueue",
+    "src/background",
 ]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/gateway" = "asman/gateway"
-"src/asmanqueue" = "asman/queue"
+"src/background" = "asman/background"

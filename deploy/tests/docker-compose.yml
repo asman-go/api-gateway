@@ -3,6 +3,7 @@
 services:
   # postgres для тестов
   asman-postgres:
+    container_name: asman-postgres-testing
     image: postgres:alpine
     restart: always
     ports:
@@ -19,6 +20,7 @@ services:
 
   # dynamodb для тестов
   dynamodb:
+    container_name: asman-dynamodb-testing
     image: amazon/dynamodb-local
     restart: always
     environment:

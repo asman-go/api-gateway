@@ -17,7 +17,8 @@ l-deploy:
 
 t-deploy:
 	@echo 'Поднимаем окружение для тестов'
-	@docker compose -f deploy/testing.docker-compose.yml up
+	@docker compose -f deploy/tests/docker-compose.yml build
+	@docker compose -f deploy/tests/docker-compose.yml up
 
 test:
 	@python -m pip install -r requirements.test.txt

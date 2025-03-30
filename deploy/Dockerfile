@@ -15,5 +15,7 @@ COPY . .
 
 RUN pip install -r requirements.git.txt
 RUN pip install "."
+RUN chmod +x ./scripts/start.sh
 
-CMD ["python", "src/gateway/app.py"]
+# CMD ["python", "src/gateway/app.py"]
+ENTRYPOINT [ "/code/scripts/start.sh" ]

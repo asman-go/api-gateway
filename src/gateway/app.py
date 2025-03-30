@@ -10,6 +10,9 @@ from asman.gateway.core.configs import (
     ApiKeyConfig,
     AppGatewayConfig,
 )
+# Импортируем celery app, чтобы он был доступен в контексте gateway api
+# и из gateway api можно было запускать celery таски!
+from asman.background import BACKGROUND_APP
 
 
 config = ApiGatewayConfig()  # from envs
@@ -35,6 +38,7 @@ gateway = GatewayAPI(app_config).start()
 
 
 if __name__ == '__main__':
+    # Start GatewayAPI
     uvicorn.run(
         gateway,
         host=config.HTTP_HOST,

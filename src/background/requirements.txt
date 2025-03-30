@@ -1,0 +1,4 @@
+# celery[sqs,sqlalchemy,dynamodb,redis]
+celery[redis]
+celery-singleton
+flower
