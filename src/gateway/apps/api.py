@@ -18,6 +18,7 @@ from asman.gateway.routers import (
     # FacebookWebhookRouter,
     # CertificateTransparencyRouter,
 )
+from asman.gateway.web import WebApp
 
 
 class GatewayAPI(object):
@@ -31,13 +32,14 @@ class GatewayAPI(object):
     def start(self) -> FastAPI:
 
         app = self._base_fast_api_app(self.config.logger_name)
-        app.root_path = '/api'
+        # app.root_path = '/api'
 
-        app.mount('/public', self._public_api(self.config.logger_name))
-        app.mount('/integrations', self._integrations_api(self.config.logger_name))
+        app.mount('/', WebApp)
+        app.mount('/api/public', self._public_api(self.config.logger_name))
+        app.mount('/api/integrations', self._integrations_api(self.config.logger_name))
 
-        app.mount('/admin', self._admin_api(self.config.logger_name))
-        app.mount('/private', self._private_api(self.config.logger_name))
+        app.mount('/api/admin', self._admin_api(self.config.logger_name))
+        app.mount('/api/private', self._private_api(self.config.logger_name))
 
         return app
 
