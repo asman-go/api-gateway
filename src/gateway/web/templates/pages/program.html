@@ -1,0 +1,95 @@
+<style>
+    .program-page {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .program-info {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .program-assets {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+</style>
+
+<div class="program-page">
+    <div class="program-info">
+        <p>Общая информация:</p>
+        <div>
+            <p>{{program_name}}</p>
+            <a href="{{program_site}}">сайт</a>
+            <p>{{platform}}</p>
+            <p>{{notes}}</p>
+        </div>
+    </div>
+    <div class="program-assets">
+        <p>Ассеты:</p>
+        <form action="/api/private/program/{{id}}/assets" method="post" name="addAssetForm">
+            <input type="text" name="value" placeholder="value" required>
+            <select name="type" required>
+                <option value="1">Web</option>
+                <option value="0">Mobile</option>
+                <option value="2">API</option>
+                <option value="3">IP</option>
+                <option value="4">Subnet</option>
+                <option value="9999">Other</option>
+            </select>
+            <input type="checkbox" name="in_scope" checked>
+            <input type="checkbox" name="is_paid" checked>
+            <button type="submit">Add new asset</button>
+        </form>
+        <ul>
+            {{assets|safe}}
+        </ul>
+    </div> 
+</div>
+
+<script>
+    const addAssetForm = document.forms.addAssetForm
+
+    const addAssetHandler = (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target)
+        const data = {}
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+
+        data['is_paid'] = Boolean(data['is_paid'])
+        data['in_scope'] = Boolean(data['in_scope'])
+
+        fetch(addAssetForm.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                'assets': [
+                    data,
+                ]
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+        })
+        .then(data => {
+            console.log('Added asset', data)
+        })
+        .catch(error => {
+            console.log('Something wrong', error)
+        })
+    }
+
+    addAssetForm.addEventListener('submit', addAssetHandler)
+</script>

@@ -85,6 +85,7 @@ async def run(program_id: int):
     assets = await GetAssetsUseCase().execute(
         ProgramId(program_id=program_id)
     )
+    print('Assets to recon 1:', list(assets))
     assets = filter(
         lambda asset: (
             asset.type == AssetType.ASSET_WEB
@@ -93,11 +94,16 @@ async def run(program_id: int):
         ),
         assets
     )
+    print('Assets to recon 2:', list(assets))
     domains = map(
         lambda asset: normalize_domain(asset.value),
         assets
     )
-    crtsh_usecase = DomainsFromCertsUseCase()
-    new_domains = await crtsh_usecase.execute(list(domains))
+    # crtsh_usecase = DomainsFromCertsUseCase()
+    # new_domains = await crtsh_usecase.execute(list(domains))
+    # return new_domains
 
-    return new_domains
+    print('Domains to recon:', list(domains))
+    print('Assets to recon:', list(assets))
+
+    return {}

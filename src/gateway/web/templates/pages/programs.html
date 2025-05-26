@@ -1,0 +1,60 @@
+<style>
+    .programs-page {
+        display: flex;
+        flex-direction: row;
+    }
+    .new-program-form {
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<div class="programs-page">
+    <form action="/api/private/program" method="post" class="new-program-form" name="newProgramForm">
+        <input type="text" name="program_name" placeholder="program_name" required>
+        <input type="text" name="program_site" placeholder="program_site" required>
+        <select name="platform" required>
+            <option value="bizone">BiZone BugBounty</option>
+            <option value="h1">HackerOne</option>
+        </select>
+        <input type="text" name="notes" placeholder="notes" id="">
+        <button type="submit">Add new program</button>
+    </form>
+    {{programs|safe}}
+</div>
+
+<script>
+    const newProgramForm = document.forms.newProgramForm
+
+    const submitHandler = (event) => {
+        event.preventDefault()
+        const formData = new FormData(event.target)
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+
+        fetch(newProgramForm.action, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // 'Authorization': 'user-api-key',
+            },
+            credentials: "include",
+            body: JSON.stringify({'program': data})
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+        })
+        .then(data => {
+            console.log('Created program', data)
+        })
+        .catch(error => {
+            console.log('Something wrong', error)
+        })
+    }
+
+    newProgramForm.addEventListener('submit', submitHandler)
+</script>

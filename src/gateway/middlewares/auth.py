@@ -13,11 +13,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # self.logger.debug(request)
-        API_KEY = request.headers.get('Authorization')
+        auth_cookie = request.cookies.get('session')
+        auth_header = request.headers.get('Authorization')
+
+        auth_factor = auth_cookie if auth_cookie else auth_header
+
         # TODO: запуск use-case на проверку API_KEY, пока static
         # Как проверять не по всем путям?
 
-        if not API_KEY or API_KEY != self.API_KEY:
+        if not auth_factor or auth_factor != self.API_KEY:
             return Response(status_code=401)
 
         response = await call_next(request)

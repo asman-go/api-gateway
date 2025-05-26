@@ -13,8 +13,12 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # self.logger.debug(request)
+        auth_cookie = request.cookies.get('session')
+        auth_header = request.headers.get('Authorization')
 
-        if request.headers.get('Authorization') != self.API_KEY:
+        auth_factor = auth_cookie if auth_cookie else auth_header
+
+        if not auth_factor or auth_factor != self.API_KEY:
             return Response(status_code=401)
 
         response = await call_next(request)

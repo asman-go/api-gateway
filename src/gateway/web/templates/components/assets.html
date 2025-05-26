@@ -1,0 +1,50 @@
+<style>
+
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>Ассет</th>
+            <th>Тип</th>
+            <th>В скоупе</th>
+            <th>Заплатят</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for asset in assets %}
+        <tr>
+            <td>{{asset.value}}</td>
+            <td>{{asset.type}}</td>
+            <td>{{asset.in_scope}}</td>
+            <td>{{asset.is_paid}}</td>
+            <td data-id="{{asset.id}}">
+                <button onclick="assetDeleteHandler(event)" disabled>Delete</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    const assetDeleteHandler = (event) => {
+        const asset_id = event.target.parentElement.dataset.id
+
+        fetch(`/api/private/program/${program_id}/assets/${asset_id}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+        })
+        .then(data => {
+            console.log('Removed program', data)
+        })
+        .catch(error => {
+            console.log('Something wrong', error)
+        })
+    }
+</script>
