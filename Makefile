@@ -12,11 +12,17 @@ deps:
 
 l-deploy:
 	@echo 'Поднимаем приложение локально'
+	# Останавливаем контейнеры, если запущены
+	@docker compose -f deploy/docker-compose.yml down
+	# Собираем и запускаем
 	@docker compose -f deploy/docker-compose.yml build
 	@docker compose -f deploy/docker-compose.yml up
 
 t-deploy:
 	@echo 'Поднимаем окружение для тестов'
+	# Останавливаем контейнеры, если запущены
+	@docker compose -f deploy/tests/docker-compose.yml down
+	# Собираем и запускаем
 	@docker compose -f deploy/tests/docker-compose.yml build
 	@docker compose -f deploy/tests/docker-compose.yml up
 

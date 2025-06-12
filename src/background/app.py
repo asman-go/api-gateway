@@ -1,13 +1,16 @@
 from celery import Celery
 from celery.signals import task_success
 
-from asman.tasks.common import DebugTask, HelloTask
+import asman.tasks.common
+import asman.tasks.recon
+
+# from asman.tasks.common import DebugTask, HelloTask
 from asman.background import CeleryConfig, AppConfig
 
 
 class MyCelery(Celery):
     def __init__(self, *args, **kwargs):
-        self.Task = DebugTask
+        self.Task = asman.tasks.common.DebugTask
         super().__init__(*args, **kwargs)
 
 
@@ -57,5 +60,5 @@ if __name__ == '__main__':
     # Run worker
     BACKGROUND_APP.worker_main(argv=BACKGROUND_ARGS)
 
-    result1 = HelloTask.delay('Ike')
+    result1 = asman.tasks.common.HelloTask.delay('Ike')
     print(f'Task result: {result1.get()}')

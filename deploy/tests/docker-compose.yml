@@ -16,6 +16,7 @@ services:
       postgres -c log_statement=all
     volumes:
       - ./configs/postgres:/docker-entrypoint-initdb.d
+      # logs into container: /var/lib/postgresql/data/log
       - postgres_data:/var/lib/postgresql/data
 
   # dynamodb для тестов

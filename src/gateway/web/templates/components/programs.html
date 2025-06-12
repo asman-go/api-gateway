@@ -64,17 +64,6 @@
         {% endfor %}
     </tbody>
 </table>
-<!-- <ul class="programs">
-    {% for program in programs %}
-        <li class="program" data-id={{program.id}}>
-            <a href="/programs/{{program.id}}">{{program.program_name}}</a>
-            <a href="{{program.program_site}}">сайт</a>
-            <p>{{program.platform}}</p>
-            <p>{{program.notes}}</p>
-            <button onclick="programDeleteHandler(event)">Delete</button>
-        </li>
-    {% endfor %}
-</ul> -->
 
 <script>
     const programDeleteHandler = (event) => {

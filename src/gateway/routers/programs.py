@@ -19,8 +19,10 @@ from asman.domains.bugbounty_programs.api import (
 )
 
 from asman.gateway.core.utils import normalize_domain
-from asman.domains.services.api import check_domain
+# from asman.domains.services.api import check_domain
 from .assets import router as AssetRouter
+from asman.tasks.recon import ReconDomainsFromCertsTask
+from asman.tasks.common import PingTask
 
 
 """
@@ -81,29 +83,42 @@ async def update_program(program_id, program: Annotated[NewProgram, Body(embed=T
 
 @router.post('/{program_id}/run')
 async def run(program_id: int):
-    
+
     assets = await GetAssetsUseCase().execute(
         ProgramId(program_id=program_id)
     )
-    print('Assets to recon 1:', list(assets))
-    assets = filter(
+
+    web_assets = filter(
         lambda asset: (
             asset.type == AssetType.ASSET_WEB
             and asset.in_scope and asset.is_paid
-            and check_domain(asset.value)
+            # and check_domain(asset.value)
         ),
         assets
     )
-    print('Assets to recon 2:', list(assets))
-    domains = map(
-        lambda asset: normalize_domain(asset.value),
-        assets
+
+    domains = filter(
+        lambda domain: domain is not None,
+        map(
+            lambda asset: normalize_domain(asset.value),
+            web_assets
+        )
     )
+    domains = list(domains)
+    print(f'/{program_id}/run', domains)
+
+
+
     # crtsh_usecase = DomainsFromCertsUseCase()
-    # new_domains = await crtsh_usecase.execute(list(domains))
+    # new_domains = await crtsh_usecase.execute(domains)
     # return new_domains
+    _result = ReconDomainsFromCertsTask.delay(domains)
+    new_domains = _result.get()
+    # _result = PingTask.delay()
+    # new_domains = _result.get()
+    
+    print('New domains:', new_domains)
 
-    print('Domains to recon:', list(domains))
-    print('Assets to recon:', list(assets))
-
-    return {}
+    return {
+        'found': new_domains,
+    }

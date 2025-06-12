@@ -35,7 +35,8 @@
         <form action="/api/private/program/{{id}}/assets" method="post" name="addAssetForm">
             <input type="text" name="value" placeholder="value" required>
             <select name="type" required>
-                <option value="1">Web</option>
+                <!-- На бэке это web, но ожидает именно домен -->
+                <option value="1">Domain</option>
                 <option value="0">Mobile</option>
                 <option value="2">API</option>
                 <option value="3">IP</option>
